@@ -1,0 +1,60 @@
+参考文献：https://www.git-tower.com/learn/git/ebook/cn/command-line/advanced-topics/git-flow
+============【开发人员】git使用手册说明============
+【开发】
+1、git初始化：git flow init（仅限第一次初始化 ）
+$ git flow init
+Initialized empty Git repository in /Users/tobi/acme-website/.git/
+Branch name for production releases: [master]
+Branch name for "next release" development: [develop]
+
+How to name your supporting branch prefixes?
+Feature branches? [feature/]
+Release branches? [release/]  
+Hotfix branches? [hotfix/]
+
+2、开始新功能：git flow feature start rss-feed其中rss-feed表示功能名称
+$ git flow feature start rss-feed
+Switched to a new branch 'feature/rss-feed'
+
+【BUG】
+1、创建 Hotfixes（处理正式环境下的BUG）
+$ git flow hotfix start missing-link
+这个命令会创建一个名为 “hotfix/missing-link” 的分支。因为这是对产品代码进行修复，所以这个 hotfix 分支是基于 “master” 分支。
+这也是和 release 分支最明显的区别，release 分支都是基于 “develop” 分支的。因为你不应该在一个还不完全稳定的开发分支上对产品代码进行地修复。
+
+就像 release 一样，修复这个错误当然也会直接影响到项目的版本号！
+
+2、完成 Hotfixes
+$ git flow hotfix finish missing-link
+这个过程非常类似于发布一个 release 版本：
+
+完成的改动会被合并到 “master” 中，同样也会合并到 “develop” 分支中，这样就可以确保这个错误不会再次出现在下一个 release 中。
+这个 hotfix 程序将被标记起来以便于参考。
+这个 hotfix 分支将被删除，然后切换到 “develop” 分支上去。
+还是和产生 release 的流程一样，现在需要编译和部署你的产品（如果这些操作不是自动被触发的话）。
+
+============【主程】git使用手册============
+1、合并develop上分支功能
+$ git flow feature finish rss-feed其中rss-feed表示功能名称
+Switched to branch 'develop'
+
+============【管理员】git使用手册============
+1、创建 release版本
+$ git flow release start 1.1.5
+Switched to a new branch 'release/1.1.5'
+当你认为现在在 “develop” 分支的代码已经是一个成熟的 release 版本时，这意味着：
+第一，它包括所有新的功能和必要的修复；
+第二，它已经被彻底的测试过了。如果上述两点都满足，那就是时候开始生成一个新的 release 了：
+
+请注意，release 分支是使用版本号命名的。这是一个明智的选择，这个命名方案还有一个很好的附带功能，那就是当我们完成了release 后，git-flow 会适当地_自动_去标记那些 release 提交。
+有了一个 release 分支，再完成针对 release 版本号的最后准备工作（如果项目里的某些文件需要记录版本号），并且进行最后的编辑。
+
+2、完成 release版本
+$ git flow release finish 1.1.5
+这个命令会完成如下一系列的操作：
+
+首先，git-flow 会拉取远程仓库，以确保目前是最新的版本。
+然后，release 的内容会被合并到 “master” 和 “develop” 两个分支中去，这样不仅产品代码为最新的版本，而且新的功能分支也将基于最新代码。
+为便于识别和做历史参考，release 提交会被标记上这个 release 的名字（在我们的例子里是 “1.1.5”）。
+清理操作，版本分支会被删除，并且回到 “develop”。
+从 Git 的角度来看，release 版本现在已经完成。依据你的设置，对 “master” 的提交可能已经触发了你所定义的部署流程，或者你可以通过手动部署，来让你的软件产品进入你的用户手中。
